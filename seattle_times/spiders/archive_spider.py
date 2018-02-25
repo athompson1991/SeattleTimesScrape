@@ -31,7 +31,8 @@ class ArchiveSpider(scrapy.Spider):
     def parse_article(self, response):
         item = response.meta['item']
         byline = response.css(".article-byline")
-        authors = byline.css("div.byline-text").css("div.name").css("a::text").extract()
-        authors_out = ", ".join(authors)
-        item['author'] = authors_out
+        authors_selectors = byline.css("div.byline-text").css("div.name").css("a::text").extract()
+        authors = ", ".join(authors_selectors)
+        authors = authors.encode('utf8')
+        item['author'] = authors
         yield item

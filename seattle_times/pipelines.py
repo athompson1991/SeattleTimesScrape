@@ -1,15 +1,18 @@
-import json
+import os
+import csv
 
-
-class JsonWriterPipeline(object):
-
+class ArticleCSVPipeline(object):
     def open_spider(self, spider):
-        self.file = open('site' + '.jl', 'w')
+        fieldnames = ['id', 'url', 'headline', 'publish_date', 'author']
+        if 'out.csv' in os.listdir('.'):
+            os.remove('out.csv')
+        self.file = open('out.csv', 'w', newline='')
+        self.writer = csv.DictWriter(self.file, delimiter=',', fieldnames=fieldnames)
+        self.writer.writeheader()
+
+    def process_item(self, item, spider):
+        line = dict(item)
+        self.writer.writerow(line)
 
     def close_spider(self, spider):
         self.file.close()
-
-    def process_item(self, item, spider):
-        data = dict(item)
-        self.file.write(json.dumps(data) + "\n")
-        return item
