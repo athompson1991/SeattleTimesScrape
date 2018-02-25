@@ -10,7 +10,7 @@ class ArchiveSpider(scrapy.Spider):
         self.base_url = 'https://www.seattletimes.com/seattle-news/politics/page/'
 
     def start_requests(self):
-        urls = [self.base_url + str(i) + "/" for i in range(1, 5000)]
+        urls = [self.base_url + str(i) + "/" for i in range(1, 10)]
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)
 
@@ -22,6 +22,16 @@ class ArchiveSpider(scrapy.Spider):
         publish_dates = [article.css("div").css("time::attr(datetime)").extract_first() for article in articles]
 
         for i in range(len(ids)):
-            article_out = Article(id = ids[i], url=urls[i], headline=titles[i], publish_date=publish_dates[i])
-            yield article_out
+            article = Article(id = ids[i], url=urls[i], headline=titles[i], publish_date=publish_dates[i])
+            request = scrapy.Request(urls[i], callback=self.parse_article)
+            request.meta['item'] = article
+            yield request
 
+
+    def parse_article(self, response):
+        item = response.meta['item']
+        byline = response.css(".article-byline")
+        authors = byline.css("div.byline-text").css("div.name").css("a::text").extract()
+        authors_out = ", ".join(authors)
+        item['author'] = authors_out
+        yield item

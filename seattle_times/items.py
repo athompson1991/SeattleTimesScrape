@@ -5,4 +5,4 @@ class Article(scrapy.Item):
     url = scrapy.Field()
     headline = scrapy.Field()
     publish_date = scrapy.Field()
-
+    author = scrapy.Field()
